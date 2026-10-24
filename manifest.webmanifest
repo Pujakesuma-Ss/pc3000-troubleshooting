@@ -1,9 +1,16 @@
 {
-  "name": "PC3000-6E Troubleshooting AI Assistant",
-  "short_name": "PC3000 AI",
+  "name": "PC3000-6E Troubleshooting Assistant",
+  "short_name": "PC3000 Assist",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f5f6f8",
+  "background_color": "#f5f6f7",
   "theme_color": "#f4c430",
-  "description": "Asisten troubleshooting Komatsu PC3000-6E"
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

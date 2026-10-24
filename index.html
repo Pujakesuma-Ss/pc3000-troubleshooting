@@ -2,75 +2,80 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4c430">
-<meta name="description" content="PC3000-6E Troubleshooting AI Assistant">
+<title>PC3000-6E Troubleshooting Assistant</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>PC3000-6E Troubleshooting AI</title>
-<style>
-:root{--yellow:#f4c430;--black:#171717;--bg:#f5f6f8;--card:#fff;--muted:#606770;--line:#dfe3e8}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#171717;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-header{background:var(--black);color:white;padding:18px 16px;border-bottom:5px solid var(--yellow)}
-header h1{font-size:1.15rem;margin:0 0 4px}header p{margin:0;color:#ddd;font-size:.9rem}
-main{max-width:850px;margin:auto;padding:16px;display:grid;gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 2px 7px #00000008}
-h2{font-size:1.05rem;margin:0 0 12px}.hint{color:var(--muted);font-size:.88rem}
-label{display:block;font-weight:650;font-size:.9rem;margin:12px 0 5px}
-input,select,textarea{width:100%;border:1px solid #c8cdd4;border-radius:9px;padding:11px;font:inherit;background:white;color:#171717}
-textarea{min-height:95px;resize:vertical}
-button{border:0;border-radius:10px;padding:12px 15px;font:inherit;font-weight:700;cursor:pointer}
-.primary{background:var(--yellow);color:#171717;width:100%;margin-top:14px}
-.secondary{background:#eceff3;color:#171717}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.status{padding:10px;border-radius:9px;background:#fff8d8;font-size:.9rem}
-#result{white-space:pre-wrap;overflow-wrap:anywhere}
-footer{text-align:center;color:var(--muted);font-size:.8rem;padding:8px 16px 24px}
-@media(max-width:520px){.row{grid-template-columns:1fr}main{padding:10px}.card{padding:13px}}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><h1>PC3000-6E Troubleshooting AI</h1><p>Asisten analisis kerusakan • Komatsu Front Shovel</p></header>
+<header class="topbar">
+  <div class="brand-mark">BAK</div>
+  <div><div class="eyebrow">FIELD DIAGNOSTIC TOOL</div><h1>PC3000-6E Troubleshooting Assistant</h1><p>Checklist • Pengukuran • Keputusan • Laporan</p></div>
+</header>
 <main>
-<section class="card">
-<h2>Kasus troubleshooting baru</h2>
-<p class="hint">Isi data yang diketahui. Jangan menebak nilai pengukuran; tulis “belum diukur” bila belum diperiksa.</p>
-<form id="caseForm">
-<label for="system">Sistem yang diperiksa</label>
-<select id="system">
-<option>Hydraulic</option><option>Electrical / Wiring</option><option>Engine</option><option>Swing</option><option>Travel</option><option>Work equipment / Front attachment</option><option>Cooling / Lubrication</option><option>General</option>
-</select>
-<label for="unit">Nomor unit</label><input id="unit" placeholder="Contoh: SE3001">
-<label for="symptom">Gejala / keluhan operator *</label><textarea id="symptom" required placeholder="Contoh: swing mengeluarkan suara abnormal saat berputar"></textarea>
-<div class="row">
-<div><label for="conditions">Kapan terjadi?</label><input id="conditions" placeholder="Contoh: saat swing kiri, oli panas"></div>
-<div><label for="codes">Kode alarm / error</label><input id="codes" placeholder="Jika ada"></div>
-</div>
-<label for="measurements">Hasil pengukuran dan pemeriksaan</label><textarea id="measurements" placeholder="Contoh: tekanan, tegangan, continuity, RPM, kondisi oli, hasil inspeksi"></textarea>
-<label for="work">Pekerjaan/pergantian terakhir</label><textarea id="work" placeholder="Contoh: setelah ganti solenoid, masalah mulai muncul"></textarea>
-<label for="question">Pertanyaan khusus untuk AI (opsional)</label><input id="question" placeholder="Contoh: titik ukur mana yang diperiksa berikutnya?">
-<button class="primary" type="submit" id="askBtn">Analisis dengan AI</button>
-</form>
-</section>
-<section class="card">
-<h2>Hasil analisis</h2>
-<div id="status" class="status">Belum ada analisis. Koneksi internet diperlukan untuk AI.</div>
-<div id="result" style="margin-top:12px"></div>
-<button id="copyBtn" class="secondary" style="margin-top:12px;display:none">Salin hasil</button>
-</section>
-<section class="card">
-<h2>Riwayat kasus di perangkat ini</h2>
-<p class="hint">Riwayat disimpan di browser perangkat ini. Tidak otomatis tersinkron ke perangkat lain.</p>
-<div id="history"></div>
-<button id="clearBtn" class="secondary" style="margin-top:10px">Hapus riwayat lokal</button>
-</section>
-<section class="card">
-<h2>Catatan keselamatan</h2>
-<p>AI adalah alat bantu, bukan pengganti manual resmi, prosedur site, atau pemeriksaan teknisi berwenang. Sebelum memeriksa rangkaian listrik/hidrolik, ikuti isolasi energi dan LOTOTO. Jangan melonggarkan fitting bertekanan. Verifikasi spesifikasi dan titik ukur dengan manual unit yang sesuai.</p>
-<p class="hint">Referensi manual belum aktif sampai administrator mengunggah PDF ke penyimpanan dokumen OpenAI dan mengatur VECTOR_STORE_ID di backend.</p>
-</section>
+  <section class="notice"><strong>Catatan keselamatan:</strong> Alat bantu pencatatan ini bukan pengganti Shop Manual/O&amp;M Manual, prosedur LOTOTO, atau instruksi site. Isolasi unit dan lepaskan tekanan sesuai prosedur sebelum pemeriksaan fisik. Jangan menguji rangkaian bertegangan atau sistem hidrolik tanpa kompetensi dan izin yang sesuai.</section>
+  <section class="panel">
+    <div class="section-head"><span class="stepno">01</span><div><h2>Identitas pekerjaan</h2><p>Isi data unit sebelum memulai pemeriksaan.</p></div></div>
+    <div class="grid">
+      <label>Nomor unit<input id="unit" placeholder="Contoh: SE3001"></label>
+      <label>HM unit<input id="hm" inputmode="decimal" placeholder="Contoh: 37549.6"></label>
+      <label>Nama mekanik<input id="mechanic" placeholder="Nama pemeriksa"></label>
+      <label>Tanggal<input id="date" type="date"></label>
+      <label class="wide">Gejala / kondisi awal<textarea id="symptom" rows="2" placeholder="Kapan alarm muncul? Kondisi kerja, temperatur, beban, dan gejala lain…"></textarea></label>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="section-head"><span class="stepno">02</span><div><h2>Pilih trouble code</h2><p>Versi awal menyediakan alur B15 sebagai contoh terstruktur.</p></div></div>
+    <label>Daftar trouble code
+      <select id="code">
+        <option value="B15">B15 — Hydraulic oil temperature too high</option>
+      </select>
+    </label>
+    <div class="code-summary"><span class="pill">B15</span><div><strong>Hydraulic oil temperature too high</strong><p>Rujukan manual: Troubleshooting by Trouble Code, bagian B15, halaman cetak 83–88 (nomor halaman PDF bisa berbeda).</p></div></div>
+  </section>
+  <section class="panel">
+    <div class="section-head"><span class="stepno">03</span><div><h2>Checklist pemeriksaan bertahap</h2><p>Pilih hasil tiap langkah. Jawaban akan menampilkan arahan berikutnya.</p></div></div>
+    <div id="steps"></div>
+    <div id="nextAction" class="next-action" aria-live="polite">Mulai dari Langkah 1. Lengkapi hasil pemeriksaan untuk melihat arahan.</div>
+  </section>
+  <section class="panel">
+    <div class="section-head"><span class="stepno">04</span><div><h2>Data pengukuran</h2><p>Catat angka aktual dan satuan. Nilai standar harus dilihat pada tabel/manual yang sesuai.</p></div></div>
+    <div class="grid">
+      <label>Temperatur oli hidrolik (°C)<input id="oilTemp" inputmode="decimal" placeholder="Nilai aktual"></label>
+      <label>Sensor temperatur B75 / PT100<input id="sensorResult" placeholder="Nilai ohm/hasil uji + suhu"></label>
+      <label>Setelan temperature switch K100<input id="k100" placeholder="Nilai aktual / posisi"></label>
+      <label>Solenoid Y101<input id="y101" placeholder="Hasil pemeriksaan"></label>
+      <label class="wide">Pengukuran / data tambahan<textarea id="measureNotes" rows="3" placeholder="Alat ukur, titik ukur, kondisi pengukuran, hasil dan satuan…"></textarea></label>
+    </div>
+    <p class="hint">Jangan memasukkan nilai “normal” berdasarkan perkiraan. Bandingkan dengan standard value table, diagram, dan prosedur pada manual yang berlaku untuk serial number serta konfigurasi unit.</p>
+  </section>
+  <section class="panel">
+    <div class="section-head"><span class="stepno">05</span><div><h2>Analisis dan tindak lanjut</h2><p>Keputusan akhir tetap dikonfirmasi oleh personel berwenang.</p></div></div>
+    <div class="grid">
+      <label class="wide">Dugaan penyebab<textarea id="cause" rows="2" placeholder="Isi berdasarkan hasil ukur dan langkah manual yang sudah diverifikasi"></textarea></label>
+      <label class="wide">Tindakan perbaikan<textarea id="action" rows="2" placeholder="Tindakan yang dilakukan / direncanakan"></textarea></label>
+      <label>Status akhir<select id="status"><option>Belum selesai</option><option>Perlu pemeriksaan lanjutan</option><option>Perbaikan dilakukan — perlu verifikasi</option><option>Alarm tidak muncul setelah verifikasi</option><option>Diserahkan ke engineering / supervisor</option></select></label>
+      <label>Disetujui oleh<input id="approver" placeholder="Foreman / supervisor"></label>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="section-head"><span class="stepno">06</span><div><h2>Laporan troubleshooting</h2><p>Buat laporan dari data yang sudah diisi.</p></div></div>
+    <div class="actions">
+      <button id="generate" class="primary">Buat / perbarui laporan</button>
+      <button id="save">Simpan di HP</button>
+      <button id="load">Muat simpanan</button>
+      <button id="copy">Salin laporan</button>
+      <button id="download">Unduh .txt</button>
+      <button id="print">Cetak / Simpan PDF</button>
+      <button id="reset" class="danger">Reset formulir</button>
+    </div>
+    <p id="saveMsg" class="hint" aria-live="polite">Simpanan hanya berada di browser perangkat ini.</p>
+    <textarea id="report" class="report" rows="18" placeholder="Laporan akan muncul di sini…" readonly></textarea>
+  </section>
+  <footer>Prototype v1 • B15 only • Gunakan manual resmi yang sesuai dengan unit. Periksa kembali semua data sebelum digunakan sebagai laporan kerja.</footer>
 </main>
-<footer>PC3000-6E Troubleshooting AI Assistant • Prototipe awal</footer>
 <script src="app.js"></script>
 </body>
 </html>

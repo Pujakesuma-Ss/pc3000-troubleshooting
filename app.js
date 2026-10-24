@@ -1,44 +1,58 @@
-const API_BASE = ""; // Jika backend terpisah, isi URL worker, contoh https://nama-worker.workers.dev
-const $ = (id) => document.getElementById(id);
-const STORAGE_KEY = "pc3000-ai-history-v1";
-
-function readHistory(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]")}catch{return []}}
-function saveHistory(items){localStorage.setItem(STORAGE_KEY,JSON.stringify(items.slice(0,15)));renderHistory()}
-function renderHistory(){
- const h=$("history"), items=readHistory();
- if(!items.length){h.innerHTML='<p class="hint">Belum ada riwayat tersimpan.</p>';return}
- h.innerHTML="";
- items.forEach((item,i)=>{
-  const div=document.createElement("div");div.style.cssText="border-top:1px solid #e1e4e8;padding:10px 0";
-  const title=document.createElement("strong");title.textContent=`${item.date} • ${item.system} • ${item.unit||"Unit belum diisi"}`;
-  const p=document.createElement("p");p.textContent=item.symptom;p.style.margin="4px 0";
-  const b=document.createElement("button");b.className="secondary";b.textContent="Lihat hasil";b.onclick=()=>{$("result").textContent=item.answer;$("status").textContent="Menampilkan riwayat lokal."; $("copyBtn").style.display="inline-block"};
-  div.append(title,p,b);h.append(div);
+const $ = id => document.getElementById(id);
+const steps = [
+ {id:"s1",title:"Langkah 1 — Konfirmasi kondisi dan keselamatan",text:"Catat kondisi saat alarm B15 muncul, temperatur yang terbaca, beban kerja, dan apakah alarm berulang. Amankan unit sesuai prosedur site/LOTOTO sebelum pemeriksaan fisik.",next:"Jika kondisi tidak aman atau temperatur berpotensi merusak komponen, hentikan pemeriksaan dan ikuti prosedur site. Jangan lanjut ke pengukuran sebelum unit aman."},
+ {id:"s2",title:"Langkah 2 — Periksa informasi konstruksi / bulletin",text:"Manual menyebut kemungkinan masalah yang bergantung pada konstruksi unit terkait sensor temperatur oli B15, relay, dan wiring. Periksa Parts & Service News AH07527 serta prosedur terbaru untuk konfigurasi unit.",next:"Jika bulletin/prosedur terbaru berlaku, ikuti prosedur tersebut. Jika tidak tersedia atau belum dipastikan, eskalasi ke foreman/engineering sebelum menyimpulkan."},
+ {id:"s3",title:"Langkah 3 — Periksa setelan temperature switch K100",text:"Dengan motor berhenti dan key switch 1S1 OFF, periksa setelan K100. Cocokkan titik switching dengan grafik, viskositas oli, dan O&M Manual yang berlaku.",next:"Jika setelan tidak sesuai, koreksi hanya mengikuti manual/grafik yang benar lalu catat setelan sebelum dan sesudah. Jika sesuai, lanjut ke langkah sensor."},
+ {id:"s4",title:"Langkah 4 — Uji sensor temperatur B75 (PT100)",text:"Ukur sensor sesuai standard value table dan prosedur pada manual. Catat temperatur saat pengukuran, alat ukur, titik ukur, dan hasil aktual.",next:"Bandingkan hasil hanya dengan standard value table resmi. Jika di luar spesifikasi, sensor dapat menjadi kandidat penggantian sesuai manual. Jika sesuai, lanjutkan diagnosis."},
+ {id:"s5",title:"Langkah 5 — Periksa solenoid Y101",text:"Uji solenoid valve Y101 untuk kontrol back pressure valve sesuai prosedur dan standard value table dalam manual.",next:"Jika hasil uji tidak sesuai spesifikasi, tindak lanjuti sesuai manual. Jika sesuai, lanjut ke pemeriksaan setelan back pressure valve."},
+ {id:"s6",title:"Langkah 6 — Periksa setelan back pressure valve",text:"Periksa penyetelan back pressure valve menurut Service Manual bagian 4.3 BACK PRESSURE VALVE ADJUSTMENT.",next:"Jika setelan salah, lakukan penyetelan hanya sesuai prosedur resmi. Langkah berikutnya dalam manual B15 harus dibaca dari halaman lanjutan yang sesuai; aplikasi ini tidak mengarang langkah tersebut."}
+];
+const resultOptions = [["Belum diperiksa","pending"],["OK / sesuai","ok"],["Tidak OK / tidak sesuai","bad"],["Tidak dapat diuji","na"]];
+function renderSteps(){
+ const host=$("steps"); host.innerHTML="";
+ steps.forEach((s,i)=>{
+  const div=document.createElement("div"); div.className="check-step";
+  div.innerHTML=`<div class="check-title">${s.title}</div><p>${s.text}</p><div class="step-controls">${resultOptions.map((o,j)=>`<label><input type="radio" name="${s.id}" value="${o[1]}" ${j===0?"checked":""}> ${o[0]}</label>`).join("")}</div><label class="step-note">Catatan langkah ini<textarea id="${s.id}note" rows="2" placeholder="Hasil observasi / referensi halaman manual"></textarea></label>`;
+  host.appendChild(div);
+  div.querySelectorAll("input").forEach(el=>el.addEventListener("change",updateNext));
  });
+ updateNext();
 }
-$("caseForm").addEventListener("submit",async(e)=>{
- e.preventDefault();
- const data={
-  system:$("system").value,unit:$("unit").value.trim(),symptom:$("symptom").value.trim(),
-  conditions:$("conditions").value.trim(),codes:$("codes").value.trim(),
-  measurements:$("measurements").value.trim(),work:$("work").value.trim(),question:$("question").value.trim()
- };
- $("askBtn").disabled=true;$("askBtn").textContent="Sedang menganalisis…";
- $("status").textContent="Menghubungi backend AI. Mohon tunggu."; $("result").textContent="";
- try{
-  const res=await fetch(`${API_BASE}/api/diagnose`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data)});
-  const body=await res.json().catch(()=>({error:"Respons server tidak valid"}));
-  if(!res.ok)throw new Error(body.error||`Server error (${res.status})`);
-  const answer=body.answer||"AI tidak mengembalikan teks.";
-  $("result").textContent=answer;$("status").textContent=body.manualEnabled?"Analisis selesai • pencarian manual aktif":"Analisis selesai • manual belum terhubung; jawaban AI umum";
-  $("copyBtn").style.display="inline-block";
-  const items=readHistory();items.unshift({...data,answer,date:new Date().toLocaleString("id-ID")});saveHistory(items);
- }catch(err){
-  $("status").textContent="Belum berhasil menghubungi AI.";
-  $("result").textContent=`${err.message}\n\nPeriksa apakah backend sudah dipublikasikan, URL backend pada app.js sudah diisi, dan konfigurasi API tersedia. Jangan memasukkan API key ke halaman ini.`;
- }finally{$("askBtn").disabled=false;$("askBtn").textContent="Analisis dengan AI"}
-});
-$("copyBtn").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("result").textContent);$("status").textContent="Hasil disalin."}catch{$("status").textContent="Salin manual dengan menekan lama teks hasil."}});
-$("clearBtn").addEventListener("click",()=>{if(confirm("Hapus semua riwayat troubleshooting di perangkat ini?")){localStorage.removeItem(STORAGE_KEY);renderHistory()}});
-if("serviceWorker" in navigator && location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});
-renderHistory();
+function getChoice(id){const el=document.querySelector(`input[name="${id}"]:checked`);return el?el.value:"pending"}
+function updateNext(){
+ const bad=steps.find(s=>getChoice(s.id)==="bad");
+ const pending=steps.find(s=>getChoice(s.id)==="pending");
+ const na=steps.find(s=>getChoice(s.id)==="na");
+ let msg;
+ if(bad) msg=`Tindak lanjut: ${bad.title}. Hasil “Tidak OK” tercatat. Ikuti prosedur diagnosis/perbaikan pada manual yang sesuai, catat bukti pengukuran, dan jangan otomatis mengganti komponen tanpa verifikasi.`;
+ else if(na) msg=`Tindak lanjut: ${na.title}. Pemeriksaan tidak dapat dilakukan. Catat alasannya dan eskalasi ke foreman/engineering untuk menentukan metode aman berikutnya.`;
+ else if(pending) msg=`Langkah berikutnya: ${pending.title}. Selesaikan langkah berurutan dan catat hasil aktual.`;
+ else msg="Semua langkah awal telah diberi status. Verifikasi langkah lanjutan B15 pada manual lengkap sebelum menyatakan penyebab atau penutupan alarm.";
+ $("nextAction").textContent=msg;
+}
+function val(id){return ($(id).value||"").trim()||"-"}
+function reportText(){
+ const out=[
+ "PC3000-6E TROUBLESHOOTING REPORT",
+ "================================",
+ `Tanggal: ${val("date")}`,`Unit: ${val("unit")}`,`HM: ${val("hm")}`,`Mekanik: ${val("mechanic")}`,
+ `Trouble code: B15 — Hydraulic oil temperature too high`,
+ `Gejala awal: ${val("symptom")}`,"",
+ "CHECKLIST BERTAHAP"
+ ];
+ steps.forEach(s=>{out.push(s.title,`Hasil: ${resultOptions.find(o=>o[1]===getChoice(s.id))?.[0]||"Belum diperiksa"}`,`Catatan: ${val(s.id+"note")}`,`Arahan manual: ${s.next}`,"");});
+ out.push("DATA PENGUKURAN",`Temperatur oli hidrolik: ${val("oilTemp")} °C`,`Sensor B75/PT100: ${val("sensorResult")}`,`Setelan K100: ${val("k100")}`,`Solenoid Y101: ${val("y101")}`,`Data tambahan: ${val("measureNotes")}`,"","ANALISIS DAN TINDAK LANJUT",`Dugaan penyebab: ${val("cause")}`,`Tindakan perbaikan: ${val("action")}`,`Status akhir: ${val("status")}`,`Disetujui oleh: ${val("approver")}`,"","RUJUKAN: Shop Manual PC3000E-6, Troubleshooting by Trouble Code, B15, halaman cetak 83–88. Nomor halaman PDF dapat berbeda.","CATATAN: Prototype ini hanya menstrukturkan pemeriksaan awal yang teridentifikasi. Lengkapi langkah B15 lanjutan dari manual lengkap dan verifikasi standard value table sebelum digunakan sebagai keputusan teknis.");
+ return out.join("\n");
+}
+$("generate").addEventListener("click",()=>{$("report").value=reportText();$("saveMsg").textContent="Laporan diperbarui. Periksa kembali data sebelum disalin atau dicetak."});
+function collect(){const d={};document.querySelectorAll("input,select,textarea").forEach(el=>{if(!el.id && el.name){if(el.checked)d[el.name]=el.value}else if(el.id && el.id!=="report")d[el.id]=el.value});d._savedAt=new Date().toISOString();return d}
+function restore(d){document.querySelectorAll("input,select,textarea").forEach(el=>{if(!el.id&&el.name){el.checked=d[el.name]===el.value}else if(el.id&&Object.prototype.hasOwnProperty.call(d,el.id))el.value=d[el.id]});updateNext()}
+$("save").addEventListener("click",()=>{localStorage.setItem("pc3000TroubleshootingB15",JSON.stringify(collect()));$("saveMsg").textContent="Data disimpan di penyimpanan browser HP ini."});
+$("load").addEventListener("click",()=>{const s=localStorage.getItem("pc3000TroubleshootingB15");if(!s){$("saveMsg").textContent="Belum ada simpanan pada browser ini.";return}try{restore(JSON.parse(s));$("saveMsg").textContent="Simpanan dimuat."}catch(e){$("saveMsg").textContent="Simpanan tidak dapat dibaca."}});
+$("copy").addEventListener("click",async()=>{if(!$("report").value)$("report").value=reportText();try{await navigator.clipboard.writeText($("report").value);$("saveMsg").textContent="Laporan disalin."}catch(e){$("report").focus();$("report").select();$("saveMsg").textContent="Pilih teks laporan lalu gunakan Salin dari menu HP."}});
+$("download").addEventListener("click",()=>{if(!$("report").value)$("report").value=reportText();const blob=new Blob([$("report").value],{type:"text/plain;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`Troubleshooting_B15_${val("unit").replace(/[^a-z0-9_-]/gi,"_")||"unit"}.txt`;a.click();URL.revokeObjectURL(a.href)});
+$("print").addEventListener("click",()=>{if(!$("report").value)$("report").value=reportText();window.print()});
+$("reset").addEventListener("click",()=>{if(!confirm("Hapus isian pada formulir ini? Data simpanan lokal tidak ikut terhapus."))return;document.querySelectorAll("input,textarea").forEach(el=>{if(el.type==="radio")el.checked=el.value==="pending";else el.value=""});$("date").value=new Date().toISOString().slice(0,10);$("status").selectedIndex=0;$("report").value="";updateNext();$("saveMsg").textContent="Formulir direset."});
+$("date").value=new Date().toISOString().slice(0,10);
+renderSteps();
+if("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("./sw.js").catch(()=>{});
