@@ -24,3 +24,6 @@
 - Aplikasi bukan AI dan tidak dapat membaca manual lengkap otomatis. Trouble code baru harus ditambahkan sebagai alur terstruktur setelah langkah-langkahnya diverifikasi dari manual.
 - Data disimpan di browser perangkat yang digunakan; membersihkan data situs/browser dapat menghapus simpanan. Jangan menyimpan informasi sensitif yang tidak diperlukan.
 - Gunakan Shop Manual/O&M Manual sesuai serial number dan konfigurasi unit, prosedur LOTOTO, serta persetujuan site.
+
+
+Versi katalog v2 menampilkan indeks Trouble Code dan Symptoms dari daftar isi Shop Manual PC3000E-6. Prosedur terstruktur rinci yang saat ini tersedia di aplikasi masih B15; kode lain menampilkan halaman rujukan untuk mencegah diagnosis atau nilai standar yang tidak terverifikasi.
