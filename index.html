@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f4c430">
+<meta name="description" content="PC3000-6E Troubleshooting AI Assistant">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>PC3000-6E Troubleshooting AI</title>
+<style>
+:root{--yellow:#f4c430;--black:#171717;--bg:#f5f6f8;--card:#fff;--muted:#606770;--line:#dfe3e8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#171717;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--black);color:white;padding:18px 16px;border-bottom:5px solid var(--yellow)}
+header h1{font-size:1.15rem;margin:0 0 4px}header p{margin:0;color:#ddd;font-size:.9rem}
+main{max-width:850px;margin:auto;padding:16px;display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 2px 7px #00000008}
+h2{font-size:1.05rem;margin:0 0 12px}.hint{color:var(--muted);font-size:.88rem}
+label{display:block;font-weight:650;font-size:.9rem;margin:12px 0 5px}
+input,select,textarea{width:100%;border:1px solid #c8cdd4;border-radius:9px;padding:11px;font:inherit;background:white;color:#171717}
+textarea{min-height:95px;resize:vertical}
+button{border:0;border-radius:10px;padding:12px 15px;font:inherit;font-weight:700;cursor:pointer}
+.primary{background:var(--yellow);color:#171717;width:100%;margin-top:14px}
+.secondary{background:#eceff3;color:#171717}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.status{padding:10px;border-radius:9px;background:#fff8d8;font-size:.9rem}
+#result{white-space:pre-wrap;overflow-wrap:anywhere}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:8px 16px 24px}
+@media(max-width:520px){.row{grid-template-columns:1fr}main{padding:10px}.card{padding:13px}}
+</style>
+</head>
+<body>
+<header><h1>PC3000-6E Troubleshooting AI</h1><p>Asisten analisis kerusakan • Komatsu Front Shovel</p></header>
+<main>
+<section class="card">
+<h2>Kasus troubleshooting baru</h2>
+<p class="hint">Isi data yang diketahui. Jangan menebak nilai pengukuran; tulis “belum diukur” bila belum diperiksa.</p>
+<form id="caseForm">
+<label for="system">Sistem yang diperiksa</label>
+<select id="system">
+<option>Hydraulic</option><option>Electrical / Wiring</option><option>Engine</option><option>Swing</option><option>Travel</option><option>Work equipment / Front attachment</option><option>Cooling / Lubrication</option><option>General</option>
+</select>
+<label for="unit">Nomor unit</label><input id="unit" placeholder="Contoh: SE3001">
+<label for="symptom">Gejala / keluhan operator *</label><textarea id="symptom" required placeholder="Contoh: swing mengeluarkan suara abnormal saat berputar"></textarea>
+<div class="row">
+<div><label for="conditions">Kapan terjadi?</label><input id="conditions" placeholder="Contoh: saat swing kiri, oli panas"></div>
+<div><label for="codes">Kode alarm / error</label><input id="codes" placeholder="Jika ada"></div>
+</div>
+<label for="measurements">Hasil pengukuran dan pemeriksaan</label><textarea id="measurements" placeholder="Contoh: tekanan, tegangan, continuity, RPM, kondisi oli, hasil inspeksi"></textarea>
+<label for="work">Pekerjaan/pergantian terakhir</label><textarea id="work" placeholder="Contoh: setelah ganti solenoid, masalah mulai muncul"></textarea>
+<label for="question">Pertanyaan khusus untuk AI (opsional)</label><input id="question" placeholder="Contoh: titik ukur mana yang diperiksa berikutnya?">
+<button class="primary" type="submit" id="askBtn">Analisis dengan AI</button>
+</form>
+</section>
+<section class="card">
+<h2>Hasil analisis</h2>
+<div id="status" class="status">Belum ada analisis. Koneksi internet diperlukan untuk AI.</div>
+<div id="result" style="margin-top:12px"></div>
+<button id="copyBtn" class="secondary" style="margin-top:12px;display:none">Salin hasil</button>
+</section>
+<section class="card">
+<h2>Riwayat kasus di perangkat ini</h2>
+<p class="hint">Riwayat disimpan di browser perangkat ini. Tidak otomatis tersinkron ke perangkat lain.</p>
+<div id="history"></div>
+<button id="clearBtn" class="secondary" style="margin-top:10px">Hapus riwayat lokal</button>
+</section>
+<section class="card">
+<h2>Catatan keselamatan</h2>
+<p>AI adalah alat bantu, bukan pengganti manual resmi, prosedur site, atau pemeriksaan teknisi berwenang. Sebelum memeriksa rangkaian listrik/hidrolik, ikuti isolasi energi dan LOTOTO. Jangan melonggarkan fitting bertekanan. Verifikasi spesifikasi dan titik ukur dengan manual unit yang sesuai.</p>
+<p class="hint">Referensi manual belum aktif sampai administrator mengunggah PDF ke penyimpanan dokumen OpenAI dan mengatur VECTOR_STORE_ID di backend.</p>
+</section>
+</main>
+<footer>PC3000-6E Troubleshooting AI Assistant • Prototipe awal</footer>
+<script src="app.js"></script>
+</body>
+</html>
